@@ -20,17 +20,27 @@ public class Solution
         var visited = new bool[cols, rows];
         var grid = new bool[cols, rows];
         ReadInGrid(grid, rows, cols, console);
-        var start = FindNextUnvisited(grid, rows, cols);
-        int curMax = FindConnectedNeighbors(grid, start, rows, cols);
+        var answer = -1;
+        KeyValuePair<int, int>? curStart = FindNextUnvisited(grid, rows, cols);
+        while (curStart != null)
+        {
+            int curRegionSize = FindConnectedNeighbors(grid, curStart, rows, cols);
+            if (curRegionSize > answer)
+            {
+                answer = curRegionSize;
+            }
+            curStart = FindNextUnvisited(grid, rows, cols);
+        }
+        sb.Append(answer);
         return sb.ToString();
     }
 
-    private static int FindConnectedNeighbors(bool[,] grid, KeyValuePair<int, int> start, int rows, int cols)
+    private static int FindConnectedNeighbors(bool[,] grid, KeyValuePair<int, int>? start, int rows, int cols)
     {
                 
     }
 
-    private static KeyValuePair<int, int> FindNextUnvisited(bool[,] grid, int rows, int cols)
+    private static KeyValuePair<int, int>? FindNextUnvisited(bool[,] grid, int rows, int cols)
     {
         for (int i = 0; i < rows; ++i)
         {
@@ -42,6 +52,7 @@ public class Solution
                 }
             }
         }
+        return null;
     }
 
     private static void ReadInGrid(bool[,] grid, int rows, int cols, TextReader console)
