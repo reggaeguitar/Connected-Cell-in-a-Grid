@@ -9,44 +9,51 @@ public class Solution
 {
     private static void Main()
     {
-        Console.WriteLine(Solve(Console.In));
+        _console = Console.In;
+        Console.WriteLine(Solve(_console));
     }
+
+    private static int _rows;
+    private static int _cols;
+    private static bool[,] _grid;
+    private static bool[,] _visited;
+    private static TextReader _console;
 
     public static string Solve(TextReader console)
     {
         var sb = new StringBuilder();
-        var rows = Int32.Parse(Console.ReadLine());
-        var cols = Int32.Parse(Console.ReadLine());
-        var visited = new bool[cols, rows];
-        var grid = new bool[cols, rows];
-        ReadInGrid(grid, rows, cols, console);
+        _rows = Int32.Parse(Console.ReadLine());
+        _cols = Int32.Parse(Console.ReadLine());
+        var visited = new bool[_cols, _rows];
+        _grid = new bool[_cols, _rows];
+        ReadInGrid();
         var answer = -1;
-        KeyValuePair<int, int>? curStart = FindNextUnvisited(grid, rows, cols);
+        KeyValuePair<int, int>? curStart = FindNextUnvisited();
         while (curStart != null)
         {
-            int curRegionSize = FindConnectedNeighbors(grid, curStart, rows, cols);
+            int curRegionSize = FindConnectedNeighbors(curStart, 0);
             if (curRegionSize > answer)
             {
                 answer = curRegionSize;
             }
-            curStart = FindNextUnvisited(grid, rows, cols);
+            curStart = FindNextUnvisited();
         }
         sb.Append(answer);
         return sb.ToString();
     }
 
-    private static int FindConnectedNeighbors(bool[,] grid, KeyValuePair<int, int>? start, int rows, int cols)
+    private static int FindConnectedNeighbors(KeyValuePair<int, int>? cur, int size)
     {
-                
+        // todo 
     }
 
-    private static KeyValuePair<int, int>? FindNextUnvisited(bool[,] grid, int rows, int cols)
+    private static KeyValuePair<int, int>? FindNextUnvisited()
     {
-        for (int i = 0; i < rows; ++i)
+        for (int i = 0; i < _rows; ++i)
         {
-            for (int j = 0; j < cols; ++j)
+            for (int j = 0; j < _cols; ++j)
             {
-                if (grid[i, j])
+                if (_grid[i, j])
                 {
                     return new KeyValuePair<int, int>(i, j);
                 }
@@ -55,19 +62,19 @@ public class Solution
         return null;
     }
 
-    private static void ReadInGrid(bool[,] grid, int rows, int cols, TextReader console)
+    private static void ReadInGrid()
     {
-        for (int i = 0; i < rows; ++i) // read in grid
+        for (int i = 0; i < _rows; ++i)
         {
-            var curRow = console.ReadLine()
+            var curRow = _console.ReadLine()
                 .Split(' ')
                 .Select(x => x != "1")
                 .ToArray();
-            for (int j = 0; j < cols; ++j)
+            for (int j = 0; j < _cols; ++j)
             {
                 if (curRow[i])
                 {
-                    grid[i, j] = true;
+                    _grid[i, j] = true;
                 }
             }
         }
