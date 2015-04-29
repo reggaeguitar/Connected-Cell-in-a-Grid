@@ -1,37 +1,53 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text;
 
 public class Solution
 {
     private static void Main()
     {
-        _console = Console.In;
-        Console.WriteLine(Solve(_console));
+        _reader = new StreamReader("input.txt");
+        //_reader = Console.In; // crit
+        Console.WriteLine(Solve());
     }
-
+    // down, down right, right, up right, up, up left, left, down left
+    private static int[] _rowDirs = { 1, 1, 0, -1, -1, -1, 0, 1 };
+    private static int[] _colDirs = { 0, 1, 1, 1, 0, -1, -1, -1};
     private static int _rows;
     private static int _cols;
+    private static int _nextRowToVisit;
+    private static int _nextColToVisit;
     private static bool[,] _grid;
     private static bool[,] _visited;
-    private static TextReader _console;
+    private static TextReader _reader;
 
-    public static string Solve(TextReader console)
+    private struct Pair
+    {
+        public int Row;
+        public int Col;
+
+        public Pair(int row, int col)
+        {
+            Row = row;
+            Col = col;
+        }
+    }
+
+    public static string Solve()
     {
         var sb = new StringBuilder();
-        _rows = Int32.Parse(Console.ReadLine());
-        _cols = Int32.Parse(Console.ReadLine());
-        var visited = new bool[_cols, _rows];
-        _grid = new bool[_cols, _rows];
+        _rows = Int32.Parse(_reader.ReadLine());
+        _cols = Int32.Parse(_reader.ReadLine());
+        _visited = new bool[_rows, _cols];
+        _grid = new bool[_rows, _cols];
         ReadInGrid();
         var answer = -1;
-        KeyValuePair<int, int>? curStart = FindNextUnvisited();
+        Pair? curStart = FindNextUnvisited();
         while (curStart != null)
         {
-            int curRegionSize = FindConnectedNeighbors(curStart, 0);
+            _visited[curStart.Value.Row, curStart.Value.Col] = true;
+            int curRegionSize = FindConnectedNeighbors(curStart, 1);
             if (curRegionSize > answer)
             {
                 answer = curRegionSize;
@@ -42,20 +58,41 @@ public class Solution
         return sb.ToString();
     }
 
-    private static int FindConnectedNeighbors(KeyValuePair<int, int>? cur, int size)
+    private static bool IsInBounds(int row, int col)
     {
-        // todo 
+        return (col >= 0 && row >= 0 && col < _cols && row < _rows);
     }
 
-    private static KeyValuePair<int, int>? FindNextUnvisited()
+    private static int FindConnectedNeighbors(Pair? cur, int size)
     {
-        for (int i = 0; i < _rows; ++i)
+        int maxSize = 0;
+        for (int i = 0; i < _rowDirs.Length; ++i)
         {
-            for (int j = 0; j < _cols; ++j)
+            var newRow = cur.Value.Row + _rowDirs[i];
+            var newCol = cur.Value.Col + _colDirs[i];
+            if (IsInBounds(newRow, newCol) && 
+                _grid[newRow, newCol] &&
+                !_visited[newRow, newCol])
             {
-                if (_grid[i, j])
+                _visited[newRow, newCol] = true;
+                maxSize += FindConnectedNeighbors(
+                    new Pair(newRow, newCol), size);
+            }
+        }
+        return maxSize + size;
+    }
+
+    private static Pair? FindNextUnvisited()
+    {
+        for (int row = _nextRowToVisit; row < _rows; ++row)
+        {
+            for (int col = _nextColToVisit; col < _cols; ++col)
+            {
+                if (_grid[row, col] && !_visited[row, col])
                 {
-                    return new KeyValuePair<int, int>(i, j);
+                    _nextRowToVisit = row;
+                    _nextRowToVisit = col;
+                    return new Pair(row, col);
                 }
             }
         }
@@ -64,20 +101,19 @@ public class Solution
 
     private static void ReadInGrid()
     {
-        for (int i = 0; i < _rows; ++i)
+        for (int row = 0; row < _rows; ++row)
         {
-            var curRow = _console.ReadLine()
+            var curRow = _reader.ReadLine()
                 .Split(' ')
-                .Select(x => x != "1")
+                .Select(x => x == "1")
                 .ToArray();
-            for (int j = 0; j < _cols; ++j)
+            for (int col = 0; col < _cols; ++col)
             {
-                if (curRow[i])
+                if (curRow[col])
                 {
-                    _grid[i, j] = true;
+                    _grid[row, col] = true;
                 }
             }
         }
-
     }
 }
